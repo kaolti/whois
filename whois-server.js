@@ -105,6 +105,7 @@ function handleRequest(request, response) {
               console.log("upvote click");
               insertDomain(query.domain, function(data){
                 console.log("done");
+                response("upvoted");
               });
             }
 
