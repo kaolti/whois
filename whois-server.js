@@ -101,7 +101,7 @@ function handleRequest(request, response) {
 
         if (query.domain) {
 
-            if(query.upvote == true){
+            if(query.upvote == "true"){
               console.log("upvote click");
               insertDomain(query.domain, function(data){
                 console.log("done");
