@@ -22,6 +22,29 @@ MongoClient.connect(config.url, function(err, db) {
 });
 
 
+function checkUpvotes(domainName, response){
+  var collection = dbGlobal.collection('domains');
+  console.log("Checking number of upvotes for domain:" + domainName);
+
+
+  return collection.findOne({domain:domainName}, function(err, item){
+
+    if(err || !item){
+
+      console.log("Entry doesn't exist, return 0");
+      return 0;
+
+    } else {
+      console.log("Entry exists");
+      console.log(item.upvotes);
+      return item.upvotes;
+    }
+  });
+
+
+
+}
+
 function insertDomain(domainName, response) {
 
     var collection = dbGlobal.collection('domains');
@@ -74,9 +97,13 @@ function handleRequest(request, response) {
 
         if (query.domain) {
 
-            insertDomain(query.domain, function(data) {
-                console.log(data);
+            var responseJSON = {};
+
+            checkUpvotes(query.domain, function(data){
+              responseJSON.upvotes = data;
             });
+
+
 
 
             whois.lookup(query.domain, function(err, data) {
@@ -89,7 +116,7 @@ function handleRequest(request, response) {
                 } catch (err) {
                     console.log(err);
                 }
-                var responseJSON = {};
+
 
                 try {
                     responseJSON.registrantOrganization = dataJSON.find(x => x.attribute === 'Registrant Organization').value;
@@ -104,6 +131,10 @@ function handleRequest(request, response) {
 
 
                 //console.log(dataJSON[2]);
+
+
+
+                responseJSON.upvotes =
                 response.write(JSON.stringify(responseJSON));
                 response.end();
             });
