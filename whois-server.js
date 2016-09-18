@@ -22,22 +22,22 @@ MongoClient.connect(config.url, function(err, db) {
 });
 
 
-function checkUpvotes(domainName, response){
+function checkUpvotes(domainName, callback){
   var collection = dbGlobal.collection('domains');
   console.log("Checking number of upvotes for domain:" + domainName);
 
 
-  return collection.findOne({domain:domainName}, function(err, item){
+  collection.findOne({domain:domainName}, function(err, item){
 
     if(err || !item){
 
       console.log("Entry doesn't exist, return 0");
-      return 0;
+      callback(0);
 
     } else {
       console.log("Entry exists");
       console.log(item.upvotes);
-      return item.upvotes;
+      callback(item.upvotes);
     }
   });
 
