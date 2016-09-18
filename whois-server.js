@@ -93,7 +93,7 @@ function handleRequest(request, response) {
 
 
 
-
+    console.log(query);
     console.log("Sending response");
 
     try {
