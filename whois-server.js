@@ -115,11 +115,7 @@ function handleRequest(request, response) {
 
             var responseJSON = {};
 
-            checkUpvotes(query.domain, function(data){
-              console.log("checkupvotes returns: "+data)
-              console.log(data);
-              responseJSON.upvotes = data;
-            });
+
 
 
 
@@ -136,6 +132,8 @@ function handleRequest(request, response) {
                 }
 
 
+
+
                 try {
                     responseJSON.registrantOrganization = dataJSON.find(x => x.attribute === 'Registrant Organization').value;
                     responseJSON.registrantName = dataJSON.find(x => x.attribute === 'Registrant Name').value;
@@ -145,6 +143,16 @@ function handleRequest(request, response) {
                 } catch (err) {
                     console.log(err);
                 }
+
+                checkUpvotes(query.domain, function(data){
+                  console.log("checkupvotes returns: "+data)
+                  console.log(data);
+                  responseJSON.upvotes = data;
+                  response.write(JSON.stringify(responseJSON));
+                  response.end();
+                });
+
+
                 console.log(JSON.stringify(responseJSON));
 
 
@@ -152,9 +160,8 @@ function handleRequest(request, response) {
 
 
 
-                responseJSON.upvotes =
-                response.write(JSON.stringify(responseJSON));
-                response.end();
+
+
             });
 
         }
