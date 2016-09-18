@@ -1,54 +1,123 @@
-//Lets require/import the HTTP module
 var http = require('http');
+var https = require('https');
 var whois = require('whois');
 var url = require('url');
 var parser = require('parse-whois');
+var mongodb = require('mongodb');
+var MongoClient = mongodb.MongoClient;
 
-//Lets define a port we want to listen to
-const PORT=9119; 
+// Import config file with SSL certificates
+var config = require('./config');
 
-//We need a function which handles requests and send response
-function handleRequest(request, response){
-	
-	
-	var url_parts = url.parse(request.url, true);
-	var query = url_parts.query;
-	console.log("Sending response");
-    	whois.lookup(query.domain, function(err, data) {
-      		response.setHeader('content-type','application/json');
-		//console.log(data);
-		console.log("JSON: ");
-		//console.log(parser.parseWhoIsData(data));
-		try {
-		var dataJSON = parser.parseWhoIsData(data);
-		} catch(err){
-		console.log(err);
-		}
-		var responseJSON ={};
-		
-		try {
-		responseJSON.registrantOrganization = dataJSON.find(x=>x.attribute === 'Registrant Organization').value;
-		responseJSON.registrantName = dataJSON.find(x=>x.attribute === 'Registrant Name').value;
-		responseJSON.adminOrganization = dataJSON.find(x=>x.attribute === 'Admin Organization').value;
-                responseJSON.adminName = dataJSON.find(x=>x.attribute === 'Admin Name').value;
-		
-		} catch (err) {
-  			console.log(err);
-		}
-		console.log(JSON.stringify(responseJSON));
-		
+const PORT = 9118;
+var dbGlobal = {};
 
-		//console.log(dataJSON[2]);
-		response.write(JSON.stringify(responseJSON));
-		response.end();
-	});
+MongoClient.connect(config.url, function(err, db) {
+    if (err) {
+        console.log('Unable to connect to the mongoDB server. Error:', err);
+    } else {
+        console.log('Connection established to DB');
+        dbGlobal = db;
+    }
+});
+
+
+function insertDomain(domainName, response) {
+
+    var collection = dbGlobal.collection('domains');
+    console.log("Inserting domain:" + domainName + " into DB");
+    var document = {
+        domain: domainName,
+        upvotes: 1
+    };
+
+    collection.findOne({domain:domainName}, function(err, item){
+
+      if(err || !item){
+
+        console.log("Entry doesn't exist, will try to insert "+document);
+        collection.insert(document, function(err, result) {
+            if (err) {
+                console.log("Error inserting into DB");
+                return (err);
+            } else {
+                console.log(result);
+                return (result);
+            }
+
+        });
+
+
+      } else {
+        console.log("Entry exists, will increase upvotes");
+        console.log(item);
+        collection.update(item, { $inc: {"upvotes": 1 } })
+      }
+    });
+
+
+
+
+}
+
+
+
+
+function handleRequest(request, response) {
+
+    var url_parts = url.parse(request.url, true);
+    var query = url_parts.query;
+    console.log("Sending response");
+
+    try {
+        console.log("Trying to insert: " + query.domain);
+
+        if (query.domain) {
+
+            insertDomain(query.domain, function(data) {
+                console.log(data);
+            });
+
+
+            whois.lookup(query.domain, function(err, data) {
+                response.setHeader('content-type', 'application/json');
+                //console.log(data);
+                console.log("JSON: ");
+                //console.log(parser.parseWhoIsData(data));
+                try {
+                    var dataJSON = parser.parseWhoIsData(data);
+                } catch (err) {
+                    console.log(err);
+                }
+                var responseJSON = {};
+
+                try {
+                    responseJSON.registrantOrganization = dataJSON.find(x => x.attribute === 'Registrant Organization').value;
+                    responseJSON.registrantName = dataJSON.find(x => x.attribute === 'Registrant Name').value;
+                    responseJSON.adminOrganization = dataJSON.find(x => x.attribute === 'Admin Organization').value;
+                    responseJSON.adminName = dataJSON.find(x => x.attribute === 'Admin Name').value;
+
+                } catch (err) {
+                    console.log(err);
+                }
+                console.log(JSON.stringify(responseJSON));
+
+
+                //console.log(dataJSON[2]);
+                response.write(JSON.stringify(responseJSON));
+                response.end();
+            });
+
+        }
+
+    } catch (err) {
+
+    }
 }
 
 //Create a server
-var server = http.createServer(handleRequest);
+var server = https.createServer(config.options, handleRequest);
 
-//Lets start our server
-server.listen(PORT, function(){
-    //Callback triggered when server is successfully listening. Hurray!
-    console.log("Server listening on: http://localhost:%s", PORT);
+server.listen(PORT, function() {
+    console.log("Server listening on: https://localhost:%s", PORT);
 });

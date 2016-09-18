@@ -1,6 +1,8 @@
 .ssl/
 .well-known/
+config.js
 whois-server-https.js
+
 
 
 # OS generated files #

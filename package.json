@@ -1,0 +1,25 @@
+{
+  "name": "whois",
+  "version": "1.0.0",
+  "description": "",
+  "main": "whois-server.js",
+  "dependencies": {
+    "mongodb": "^2.2.10",
+    "parse-whois": "^1.0.0",
+    "whois": "^2.3.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaolti/whois.git"
+  },
+  "author": "kaolti",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kaolti/whois/issues"
+  },
+  "homepage": "https://github.com/kaolti/whois#readme"
+}
