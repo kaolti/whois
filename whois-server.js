@@ -116,6 +116,8 @@ function handleRequest(request, response) {
             var responseJSON = {};
 
             checkUpvotes(query.domain, function(data){
+              console.log("checkupvotes returns: "+data)
+              console.log(data);
               responseJSON.upvotes = data;
             });
 
