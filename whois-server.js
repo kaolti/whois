@@ -26,7 +26,7 @@ function checkUpvotes(domainName, callback){
   var collection = dbGlobal.collection('domains');
   console.log("Checking number of upvotes for domain:" + domainName);
 
-
+  try {
   collection.findOne({domain:domainName}, function(err, item){
 
     if(err || !item){
@@ -40,6 +40,10 @@ function checkUpvotes(domainName, callback){
       callback(item.upvotes);
     }
   });
+
+} catch (err){
+  callback(0);
+}
 
 
 
