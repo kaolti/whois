@@ -90,12 +90,23 @@ function handleRequest(request, response) {
 
     var url_parts = url.parse(request.url, true);
     var query = url_parts.query;
+
+
+
+
     console.log("Sending response");
 
     try {
-        console.log("Trying to insert: " + query.domain);
+        //console.log("Trying to insert: " + query.domain);
 
         if (query.domain) {
+
+            if(query.upvote == true){
+              console.log("upvote click");
+              insertDomain(query.domain, function(data){
+                console.log("done");
+              });
+            }
 
             var responseJSON = {};
 
