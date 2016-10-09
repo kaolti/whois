@@ -92,6 +92,7 @@ function insertDomain(domainName, response) {
 
 function handleRequest(request, response) {
 
+    response.setHeader('Access-Control-Allow-Origin', 'http://whorunsthis.host');
     var url_parts = url.parse(request.url, true);
     var query = url_parts.query;
 
